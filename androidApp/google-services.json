@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "737324318113",
+    "project_id": "actionfiguresapp",
+    "storage_bucket": "actionfiguresapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737324318113:android:a70e0d389fa0b90ef5dfe0",
+        "android_client_info": {
+          "package_name": "com.example.actionfiguresapp.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmDF5vk4Lv2e0OeyjTNF6BP6wfv82EQIM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
