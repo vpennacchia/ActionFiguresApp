@@ -7,6 +7,7 @@ androidx-activityCompose = "1.8.0"
 ktor = "3.0.3"
 kotlinx-serialization = "1.7.3"
 kotlinx-coroutines = "1.9.0"
+kotlinx-datetime = "0.6.1"
 koin = "4.0.0"
 firebase-gitlive = "2.1.0"
 lifecycle-viewmodel = "2.8.7"
@@ -37,6 +38,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 # Coroutines
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
 # Koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

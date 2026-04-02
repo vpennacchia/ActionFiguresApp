@@ -9,8 +9,8 @@ interface CollectionRepository {
 
     suspend fun createCollection(collection: Collection): Result<Collection>
     suspend fun updateCollection(collection: Collection): Result<Unit>
-    suspend fun deleteCollection(collectionId: String): Result<Unit>
+    suspend fun deleteCollection(userId: String, collectionId: String): Result<Unit>
 
-    suspend fun addFigure(collectionId: String, figure: ActionFigure): Result<Unit>
-    suspend fun removeFigure(collectionId: String, figureId: String): Result<Unit>
+    suspend fun addFigure(userId: String, collectionId: String, figure: ActionFigure): Result<Unit>
+    suspend fun removeFigure(userId: String, collectionId: String, figureId: String): Result<Unit>
 }

@@ -1,8 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.googleServices)
+}
+
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
 }
 
 android {
@@ -14,9 +20,13 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        buildConfigField("String", "EBAY_CLIENT_ID", "\"${localProperties["ebay.client.id"]}\"")
+        buildConfigField("String", "EBAY_CLIENT_SECRET", "\"${localProperties["ebay.client.secret"]}\"")
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {
@@ -29,11 +39,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 }
 
@@ -49,6 +59,17 @@ dependencies {
 
     debugImplementation(libs.compose.ui.tooling)
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
+
+    // Ktor
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.serialization.json)
+    implementation(libs.kotlinx.serialization.json)
+
+    // Firebase
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
     // Koin
     implementation(libs.koin.android)

@@ -21,6 +21,9 @@ import org.koin.compose.koinInject
 @Composable
 fun NavGraph(navController: NavHostController) {
     val authViewModel: AuthViewModel = koinInject()
+    val collectionsViewModel: CollectionsViewModel = koinInject()
+    val searchViewModel: SearchViewModel = koinInject()
+
     val authState by authViewModel.uiState.collectAsState()
 
     val startDestination = if (authState.user != null) {
@@ -59,7 +62,6 @@ fun NavGraph(navController: NavHostController) {
         }
 
         composable(Screen.Collections.route) {
-            val collectionsViewModel: CollectionsViewModel = koinInject()
             CollectionsScreen(
                 authViewModel = authViewModel,
                 collectionsViewModel = collectionsViewModel,
@@ -79,7 +81,6 @@ fun NavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("collectionId") { type = NavType.StringType })
         ) { backStackEntry ->
             val collectionId = backStackEntry.arguments?.getString("collectionId") ?: return@composable
-            val collectionsViewModel: CollectionsViewModel = koinInject()
             CollectionDetailScreen(
                 collectionId = collectionId,
                 collectionsViewModel = collectionsViewModel,
@@ -95,8 +96,6 @@ fun NavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("collectionId") { type = NavType.StringType })
         ) { backStackEntry ->
             val collectionId = backStackEntry.arguments?.getString("collectionId") ?: return@composable
-            val collectionsViewModel: CollectionsViewModel = koinInject()
-            val searchViewModel: SearchViewModel = koinInject()
             SearchScreen(
                 collectionId = collectionId,
                 searchViewModel = searchViewModel,

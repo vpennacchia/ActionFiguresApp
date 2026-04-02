@@ -1,55 +1,73 @@
 package com.example.actionfiguresapp.android
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-@Composable
-fun MyApplicationTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colors = if (darkTheme) {
-        darkColorScheme(
-            primary = Color(0xFFBB86FC),
-            secondary = Color(0xFF03DAC5),
-            tertiary = Color(0xFF3700B3)
-        )
-    } else {
-        lightColorScheme(
-            primary = Color(0xFF6200EE),
-            secondary = Color(0xFF03DAC5),
-            tertiary = Color(0xFF3700B3)
-        )
-    }
-    val typography = Typography(
-        bodyMedium = TextStyle(
-            fontFamily = FontFamily.Default,
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp
-        )
-    )
-    val shapes = Shapes(
-        small = RoundedCornerShape(4.dp),
-        medium = RoundedCornerShape(4.dp),
-        large = RoundedCornerShape(0.dp)
-    )
+val Purple = Color(0xFF7C6AF5)
+val PurpleLight = Color(0xFFAA9FF8)
+val Teal = Color(0xFF5CBFB8)
+val Gold = Color(0xFFFFB74D)
+val Background = Color(0xFF0D0E14)
+val Surface = Color(0xFF16181F)
+val SurfaceVariant = Color(0xFF1E2030)
+val OnSurface = Color(0xFFE8E8F0)
+val OnSurfaceVariant = Color(0xFF9090A8)
 
+private val AppColorScheme = darkColorScheme(
+    primary = Purple,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFF3D3280),
+    onPrimaryContainer = PurpleLight,
+    secondary = Teal,
+    onSecondary = Color.White,
+    tertiary = Gold,
+    onTertiary = Color(0xFF1A1200),
+    background = Background,
+    onBackground = OnSurface,
+    surface = Surface,
+    onSurface = OnSurface,
+    surfaceVariant = SurfaceVariant,
+    onSurfaceVariant = OnSurfaceVariant,
+    error = Color(0xFFCF6679),
+    outline = Color(0xFF3A3A50)
+)
+
+private val AppShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(32.dp)
+)
+
+private val AppTypography = Typography(
+    headlineLarge = TextStyle(fontWeight = FontWeight.Bold, fontSize = 32.sp, lineHeight = 40.sp),
+    headlineMedium = TextStyle(fontWeight = FontWeight.Bold, fontSize = 26.sp, lineHeight = 32.sp),
+    headlineSmall = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 22.sp),
+    titleLarge = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+    titleMedium = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
+    bodyLarge = TextStyle(fontWeight = FontWeight.Normal, fontSize = 16.sp),
+    bodyMedium = TextStyle(fontWeight = FontWeight.Normal, fontSize = 14.sp),
+    bodySmall = TextStyle(fontWeight = FontWeight.Normal, fontSize = 12.sp),
+    labelLarge = TextStyle(fontWeight = FontWeight.Medium, fontSize = 14.sp),
+    labelSmall = TextStyle(fontWeight = FontWeight.Medium, fontSize = 11.sp)
+)
+
+@Composable
+fun MyApplicationTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colors,
-        typography = typography,
-        shapes = shapes,
+        colorScheme = AppColorScheme,
+        typography = AppTypography,
+        shapes = AppShapes,
         content = content
     )
 }

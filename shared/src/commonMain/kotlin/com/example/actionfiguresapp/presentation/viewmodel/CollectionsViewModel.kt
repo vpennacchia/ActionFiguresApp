@@ -24,14 +24,14 @@ class CollectionsViewModel(
     private val _uiState = MutableStateFlow(CollectionsUiState())
     val uiState: StateFlow<CollectionsUiState> = _uiState.asStateFlow()
 
+    private var currentUserId: String = ""
+
     fun loadCollections(userId: String) {
+        currentUserId = userId
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             collectionRepository.getCollections(userId).collect { collections ->
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    collections = collections
-                )
+                _uiState.value = _uiState.value.copy(isLoading = false, collections = collections)
             }
         }
     }
@@ -42,42 +42,42 @@ class CollectionsViewModel(
 
     fun createCollection(userId: String, name: String, description: String) {
         viewModelScope.launch {
-            val collection = Collection(
-                userId = userId,
-                name = name,
-                description = description
-            )
+            val collection = Collection(userId = userId, name = name, description = description)
             collectionRepository.createCollection(collection)
-                .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message)
-                }
+                .onFailure { _uiState.value = _uiState.value.copy(error = it.message) }
         }
     }
 
     fun deleteCollection(collectionId: String) {
         viewModelScope.launch {
-            collectionRepository.deleteCollection(collectionId)
-                .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message)
-                }
-        }
-    }
-
-    fun removeFigure(collectionId: String, figureId: String) {
-        viewModelScope.launch {
-            collectionRepository.removeFigure(collectionId, figureId)
-                .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message)
-                }
+            collectionRepository.deleteCollection(currentUserId, collectionId)
+                .onFailure { _uiState.value = _uiState.value.copy(error = it.message) }
         }
     }
 
     fun addFigure(collectionId: String, figure: ActionFigure) {
+        // Optimistic update: aggiorna subito la UI senza aspettare Firestore
+        val updated = _uiState.value.collections.map { col ->
+            if (col.id == collectionId) col.copy(figures = col.figures + figure) else col
+        }
+        _uiState.value = _uiState.value.copy(collections = updated)
+
         viewModelScope.launch {
-            collectionRepository.addFigure(collectionId, figure)
-                .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message)
-                }
+            collectionRepository.addFigure(currentUserId, collectionId, figure)
+                .onFailure { _uiState.value = _uiState.value.copy(error = it.message) }
+        }
+    }
+
+    fun removeFigure(collectionId: String, figureId: String) {
+        // Optimistic update
+        val updated = _uiState.value.collections.map { col ->
+            if (col.id == collectionId) col.copy(figures = col.figures.filter { it.id != figureId }) else col
+        }
+        _uiState.value = _uiState.value.copy(collections = updated)
+
+        viewModelScope.launch {
+            collectionRepository.removeFigure(currentUserId, collectionId, figureId)
+                .onFailure { _uiState.value = _uiState.value.copy(error = it.message) }
         }
     }
 
