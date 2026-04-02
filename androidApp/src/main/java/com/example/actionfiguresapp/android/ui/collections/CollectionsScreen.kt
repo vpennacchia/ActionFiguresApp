@@ -1,6 +1,7 @@
 package com.example.actionfiguresapp.android.ui.collections
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,22 +48,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.actionfiguresapp.android.Gold
-import com.example.actionfiguresapp.android.Purple
-import com.example.actionfiguresapp.android.Teal
+import androidx.compose.ui.unit.sp
+import com.example.actionfiguresapp.android.DarkPanel
+import com.example.actionfiguresapp.android.DarkPanel2
+import com.example.actionfiguresapp.android.GridLine
+import com.example.actionfiguresapp.android.NeonCyan
+import com.example.actionfiguresapp.android.NeonGold
+import com.example.actionfiguresapp.android.NeonGreen
+import com.example.actionfiguresapp.android.NeonPink
+import com.example.actionfiguresapp.android.NeonPurple
+import com.example.actionfiguresapp.android.SpaceBlack
+import com.example.actionfiguresapp.android.TextSecondary
 import com.example.actionfiguresapp.domain.model.Collection
 import com.example.actionfiguresapp.presentation.viewmodel.AuthViewModel
 import com.example.actionfiguresapp.presentation.viewmodel.CollectionsViewModel
 
 private val cardGradients = listOf(
-    listOf(Color(0xFF7C6AF5), Color(0xFF4A90D9)),
-    listOf(Color(0xFFE91E8C), Color(0xFF7C4DFF)),
-    listOf(Color(0xFF00BCD4), Color(0xFF3F51B5)),
-    listOf(Color(0xFF4CAF50), Color(0xFF00897B)),
-    listOf(Color(0xFFFF9800), Color(0xFFE53935)),
-    listOf(Color(0xFF9C27B0), Color(0xFF1565C0))
+    listOf(Color(0xFF003D52), Color(0xFF001A2E)) to NeonCyan,
+    listOf(Color(0xFF2D0052), Color(0xFF0D0026)) to NeonPurple,
+    listOf(Color(0xFF003320), Color(0xFF001A0D)) to NeonGreen,
+    listOf(Color(0xFF520028), Color(0xFF260014)) to NeonPink,
+    listOf(Color(0xFF524200), Color(0xFF261F00)) to NeonGold,
+    listOf(Color(0xFF001A52), Color(0xFF000D26)) to Color(0xFF4D9FFF),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,43 +92,35 @@ fun CollectionsScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = SpaceBlack,
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Le mie collezioni", style = MaterialTheme.typography.titleLarge)
+                    Text("MY_COLLECTIONS", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 2.sp, color = NeonCyan)
                 },
                 actions = {
                     authState.user?.displayName?.firstOrNull()?.let { initial ->
                         Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(Purple, MaterialTheme.shapes.small),
+                            modifier = Modifier.size(30.dp).background(DarkPanel2, MaterialTheme.shapes.small).border(1.dp, NeonCyan.copy(0.5f), MaterialTheme.shapes.small),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                initial.uppercaseChar().toString(),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = Color.White
-                            )
+                            Text(initial.uppercaseChar().toString(), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = NeonCyan)
                         }
                         Spacer(Modifier.width(8.dp))
                     }
                     IconButton(onClick = { authViewModel.signOut(); onSignOut() }) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Esci", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Esci", tint = TextSecondary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SpaceBlack)
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showCreateDialog = true },
-                containerColor = Purple,
-                contentColor = Color.White,
-                shape = MaterialTheme.shapes.medium
+                containerColor = NeonCyan,
+                contentColor = SpaceBlack,
+                shape = MaterialTheme.shapes.small
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Nuova collezione")
             }
@@ -126,26 +128,17 @@ fun CollectionsScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when {
-                collectionsState.isLoading -> {
-                    CircularProgressIndicator(color = Purple, modifier = Modifier.align(Alignment.Center))
-                }
-                collectionsState.collections.isEmpty() -> {
-                    EmptyCollectionsState(modifier = Modifier.align(Alignment.Center))
-                }
-                else -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(collectionsState.collections) { collection ->
-                            CollectionCard(
-                                collection = collection,
-                                gradient = cardGradients[collectionsState.collections.indexOf(collection) % cardGradients.size],
-                                onClick = { onCollectionClick(collection.id) }
-                            )
-                        }
+                collectionsState.isLoading -> CircularProgressIndicator(color = NeonCyan, modifier = Modifier.align(Alignment.Center))
+                collectionsState.collections.isEmpty() -> EmptyState(modifier = Modifier.align(Alignment.Center))
+                else -> LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(collectionsState.collections) { collection ->
+                        val (gradient, neon) = cardGradients[collectionsState.collections.indexOf(collection) % cardGradients.size]
+                        CollectionCard(collection = collection, gradient = gradient, neonColor = neon, onClick = { onCollectionClick(collection.id) })
                     }
                 }
             }
@@ -164,46 +157,44 @@ fun CollectionsScreen(
 }
 
 @Composable
-private fun CollectionCard(collection: Collection, gradient: List<Color>, onClick: () -> Unit) {
+private fun CollectionCard(collection: Collection, gradient: List<Color>, neonColor: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp)
-            .clip(MaterialTheme.shapes.large)
+            .height(150.dp)
+            .clip(MaterialTheme.shapes.medium)
             .background(Brush.linearGradient(gradient))
+            .border(1.dp, neonColor.copy(alpha = 0.5f), MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
-            .padding(16.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-            Icon(
-                imageVector = Icons.Default.SmartToy,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.5f),
-                modifier = Modifier.size(28.dp)
-            )
+        // Top neon strip
+        Box(modifier = Modifier.fillMaxWidth().height(2.dp).background(neonColor).align(Alignment.TopStart))
+
+        Column(
+            modifier = Modifier.fillMaxSize().padding(12.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.SmartToy, contentDescription = null, tint = neonColor.copy(0.6f), modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("SYS://COL", fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = neonColor.copy(0.5f), letterSpacing = 1.sp)
+            }
             Column {
-                Text(
-                    text = collection.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
-                    maxLines = 2
-                )
-                Spacer(Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Text(text = collection.name, style = MaterialTheme.typography.titleMedium, color = Color.White, maxLines = 2)
+                Spacer(Modifier.height(6.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
-                        text = "${collection.figureCount} figure",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.75f)
+                        text = "${collection.figureCount}x",
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 11.sp,
+                        color = neonColor.copy(0.7f)
                     )
                     Text(
-                        text = "€ %.0f".format(collection.totalValue),
-                        style = MaterialTheme.typography.labelLarge,
+                        text = "€${"%,.0f".format(collection.totalValue)}",
+                        fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        fontSize = 13.sp,
+                        color = NeonGold
                     )
                 }
             }
@@ -212,22 +203,11 @@ private fun CollectionCard(collection: Collection, gradient: List<Color>, onClic
 }
 
 @Composable
-private fun EmptyCollectionsState(modifier: Modifier = Modifier) {
+private fun EmptyState(modifier: Modifier = Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(
-            imageVector = Icons.Default.SmartToy,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(64.dp)
-        )
-        Spacer(Modifier.height(16.dp))
-        Text("Nessuna collezione", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "Premi + per crearne una",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Text("[ NO DATA FOUND ]", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = NeonCyan, letterSpacing = 2.sp)
+        Spacer(Modifier.height(8.dp))
+        Text("Premi + per creare la tua prima collezione", fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = TextSecondary, letterSpacing = 1.sp)
     }
 }
 
@@ -238,39 +218,40 @@ private fun CreateCollectionDialog(onConfirm: (String, String) -> Unit, onDismis
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        title = { Text("Nuova collezione", style = MaterialTheme.typography.titleLarge) },
+        containerColor = DarkPanel,
+        shape = MaterialTheme.shapes.medium,
+        title = {
+            Text("NEW_COLLECTION.INIT()", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = NeonCyan, letterSpacing = 1.sp)
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nome *") },
+                    label = { Text("NOME *", fontFamily = FontFamily.Monospace, fontSize = 11.sp) },
                     singleLine = true,
-                    shape = MaterialTheme.shapes.medium,
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Purple, focusedLabelColor = Purple),
+                    shape = MaterialTheme.shapes.small,
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = NeonCyan, focusedLabelColor = NeonCyan, unfocusedBorderColor = GridLine, unfocusedLabelColor = TextSecondary),
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Descrizione") },
+                    label = { Text("DESCRIZIONE", fontFamily = FontFamily.Monospace, fontSize = 11.sp) },
                     singleLine = true,
-                    shape = MaterialTheme.shapes.medium,
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Purple, focusedLabelColor = Purple),
+                    shape = MaterialTheme.shapes.small,
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = NeonPurple, focusedLabelColor = NeonPurple, unfocusedBorderColor = GridLine, unfocusedLabelColor = TextSecondary),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(name, description) }, enabled = name.isNotBlank()) {
-                Text("Crea", color = Purple, fontWeight = FontWeight.Bold)
+                Text("[ CREA ]", fontFamily = FontFamily.Monospace, color = NeonCyan, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Annulla", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            TextButton(onClick = onDismiss) { Text("[ ANNULLA ]", fontFamily = FontFamily.Monospace, color = TextSecondary) }
         }
     )
 }

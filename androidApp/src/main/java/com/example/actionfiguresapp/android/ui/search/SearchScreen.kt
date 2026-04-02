@@ -1,6 +1,8 @@
 package com.example.actionfiguresapp.android.ui.search
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,8 +22,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,12 +45,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.example.actionfiguresapp.android.Gold
-import com.example.actionfiguresapp.android.Purple
-import com.example.actionfiguresapp.android.Teal
+import com.example.actionfiguresapp.android.DarkPanel2
+import com.example.actionfiguresapp.android.GridLine
+import com.example.actionfiguresapp.android.NeonCyan
+import com.example.actionfiguresapp.android.NeonGold
+import com.example.actionfiguresapp.android.NeonGreen
+import com.example.actionfiguresapp.android.SpaceBlack
+import com.example.actionfiguresapp.android.TextSecondary
 import com.example.actionfiguresapp.domain.model.ActionFigure
 import com.example.actionfiguresapp.presentation.viewmodel.CollectionsViewModel
 import com.example.actionfiguresapp.presentation.viewmodel.SearchViewModel
@@ -70,98 +77,60 @@ fun SearchScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = SpaceBlack,
         topBar = {
             TopAppBar(
-                title = { Text("Cerca figure", style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = { searchViewModel.clearSearch(); onBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Indietro")
+                title = {
+                    Column {
+                        Text("SEARCH.EXE", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = NeonGreen, letterSpacing = 2.sp)
+                        Text("AGGIUNGI A COLLEZIONE", fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = TextSecondary, letterSpacing = 1.sp)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                navigationIcon = {
+                    IconButton(onClick = { searchViewModel.clearSearch(); onBack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = NeonCyan)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SpaceBlack)
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-
-            // Search bar
             TextField(
                 value = searchState.query,
                 onValueChange = { searchViewModel.onQueryChange(it) },
-                placeholder = { Text("Es. Funko Harry Potter...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Purple) },
+                placeholder = { Text("Cerca su eBay...", fontFamily = FontFamily.Monospace, fontSize = 12.sp, color = TextSecondary) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = NeonGreen) },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                    focusedContainerColor = DarkPanel2,
+                    unfocusedContainerColor = DarkPanel2,
+                    focusedIndicatorColor = NeonGreen,
+                    unfocusedIndicatorColor = GridLine,
+                    focusedTextColor = NeonGreen,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = NeonGreen
                 ),
-                shape = MaterialTheme.shapes.large,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                shape = RoundedCornerShape(28.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
-                    searchState.isLoading -> {
-                        CircularProgressIndicator(color = Purple, modifier = Modifier.align(Alignment.Center))
+                    searchState.isLoading -> CircularProgressIndicator(color = NeonGreen, modifier = Modifier.align(Alignment.Center))
+                    searchState.query.length < 2 -> IdleState(modifier = Modifier.align(Alignment.Center))
+                    searchState.results.isEmpty() && !searchState.isLoading -> Box(Modifier.align(Alignment.Center)) {
+                        Text("[ NESSUN RISULTATO ]", fontFamily = FontFamily.Monospace, fontSize = 12.sp, color = NeonCyan, letterSpacing = 2.sp)
                     }
-                    searchState.query.length < 2 -> {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(56.dp)
-                            )
-                            Spacer(Modifier.size(12.dp))
-                            Text("Cerca su eBay", style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                "Scrivi almeno 2 caratteri",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    searchState.results.isEmpty() && !searchState.isLoading -> {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                Icons.Default.SmartToy,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(56.dp)
-                            )
-                            Spacer(Modifier.size(12.dp))
-                            Text("Nessun risultato", style = MaterialTheme.typography.titleMedium)
-                        }
-                    }
-                    else -> {
-                        LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            items(searchState.results) { figure ->
-                                SearchResultCard(
-                                    figure = figure,
-                                    onAdd = {
-                                        collectionsViewModel.addFigure(collectionId, figure)
-                                        searchViewModel.clearSearch()
-                                        onBack()
-                                    }
-                                )
-                            }
+                    else -> LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(searchState.results) { figure ->
+                            SearchResultCard(figure = figure, onAdd = {
+                                collectionsViewModel.addFigure(collectionId, figure)
+                                searchViewModel.clearSearch()
+                                onBack()
+                            })
                         }
                     }
                 }
@@ -171,59 +140,44 @@ fun SearchScreen(
 }
 
 @Composable
+private fun IdleState(modifier: Modifier = Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("[ EBAY SCANNER READY ]", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = NeonGreen, letterSpacing = 2.sp)
+        Spacer(Modifier.height(6.dp))
+        Text("Min. 2 caratteri per avviare la ricerca", fontFamily = FontFamily.Monospace, fontSize = 10.sp, color = TextSecondary, letterSpacing = 1.sp)
+    }
+}
+
+@Composable
 private fun SearchResultCard(figure: ActionFigure, onAdd: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = MaterialTheme.shapes.large
+    Box(
+        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium)
+            .background(DarkPanel2).border(1.dp, GridLine, MaterialTheme.shapes.medium)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colorScheme.surface),
+                modifier = Modifier.size(68.dp).clip(MaterialTheme.shapes.small)
+                    .background(SpaceBlack).border(1.dp, GridLine, MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center
             ) {
                 if (figure.imageUrl != null) {
-                    AsyncImage(
-                        model = figure.imageUrl,
-                        contentDescription = figure.name,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    AsyncImage(model = figure.imageUrl, contentDescription = figure.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 } else {
-                    Icon(Icons.Default.SmartToy, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Default.SmartToy, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(32.dp))
                 }
             }
-
             Spacer(Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = figure.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2
-                )
+                Text(figure.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, maxLines = 2)
                 figure.condition?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(it.uppercase(), fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = NeonCyan.copy(0.6f), letterSpacing = 1.sp)
                 }
                 figure.price?.let {
-                    Text(
-                        text = "€ %.2f".format(it),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Gold,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("€ ${"%.2f".format(it)}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = NeonGold)
                 }
             }
-
             IconButton(onClick = onAdd) {
-                Icon(Icons.Default.AddCircle, contentDescription = "Aggiungi", tint = Teal, modifier = Modifier.size(32.dp))
+                Icon(Icons.Default.AddCircle, contentDescription = "Aggiungi", tint = NeonGreen, modifier = Modifier.size(32.dp))
             }
         }
     }

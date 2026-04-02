@@ -55,6 +55,7 @@ class EbayApiService(
             header("X-EBAY-C-MARKETPLACE-ID", MARKETPLACE_ID)
             parameter("q", query)
             parameter("limit", SEARCH_LIMIT)
+            parameter("category_ids", "246")
         }.body()
         return response.itemSummaries
     }

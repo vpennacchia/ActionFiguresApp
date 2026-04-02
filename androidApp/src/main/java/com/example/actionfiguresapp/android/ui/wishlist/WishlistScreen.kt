@@ -3,6 +3,7 @@ package com.example.actionfiguresapp.android.ui.wishlist
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,8 +23,6 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,12 +43,19 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.example.actionfiguresapp.android.Gold
-import com.example.actionfiguresapp.android.Purple
-import com.example.actionfiguresapp.android.Teal
+import com.example.actionfiguresapp.android.DarkPanel2
+import com.example.actionfiguresapp.android.GridLine
+import com.example.actionfiguresapp.android.NeonCyan
+import com.example.actionfiguresapp.android.NeonGold
+import com.example.actionfiguresapp.android.NeonPink
+import com.example.actionfiguresapp.android.NeonPurple
+import com.example.actionfiguresapp.android.SpaceBlack
+import com.example.actionfiguresapp.android.TextSecondary
 import com.example.actionfiguresapp.domain.model.ActionFigure
 import com.example.actionfiguresapp.presentation.viewmodel.AuthViewModel
 import com.example.actionfiguresapp.presentation.viewmodel.WishlistViewModel
@@ -69,52 +75,36 @@ fun WishlistScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = SpaceBlack,
         topBar = {
             TopAppBar(
-                title = { Text("Wishlist", style = MaterialTheme.typography.titleLarge) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                title = {
+                    Column {
+                        Text("WISHLIST.DB", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = NeonPurple, letterSpacing = 2.sp)
+                        Text("FIGURE DESIDERATE // TARGET LIST", fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = TextSecondary, letterSpacing = 1.sp)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SpaceBlack)
             )
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when {
-                wishlistState.isLoading -> {
-                    CircularProgressIndicator(color = Purple, modifier = Modifier.align(Alignment.Center))
+                wishlistState.isLoading -> CircularProgressIndicator(color = NeonPurple, modifier = Modifier.align(Alignment.Center))
+                wishlistState.items.isEmpty() -> Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("[ WISHLIST VUOTA ]", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = NeonPurple, letterSpacing = 2.sp)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Cerca su Esplora e aggiungi con l'icona bookmark", fontFamily = FontFamily.Monospace, fontSize = 10.sp, color = TextSecondary, letterSpacing = 1.sp)
                 }
-                wishlistState.items.isEmpty() -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(Icons.Default.BookmarkBorder, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(64.dp))
-                        Spacer(Modifier.height(16.dp))
-                        Text("Wishlist vuota", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(4.dp))
-                        Text("Cerca su eBay e aggiungi le figure che vuoi", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-                else -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        WishlistSummaryBanner(
-                            count = wishlistState.items.size,
-                            totalValue = wishlistState.items.sumOf { it.price ?: 0.0 }
-                        )
-                        LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            items(wishlistState.items, key = { it.id }) { figure ->
-                                WishlistItemCard(
-                                    figure = figure,
-                                    onOpenEbay = {
-                                        figure.ebayUrl?.let { url ->
-                                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                                        }
-                                    },
-                                    onRemove = { wishlistViewModel.removeFromWishlist(figure.id) }
-                                )
-                            }
+                else -> Column(modifier = Modifier.fillMaxSize()) {
+                    WishlistHudBanner(count = wishlistState.items.size, totalValue = wishlistState.items.sumOf { it.price ?: 0.0 })
+                    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(wishlistState.items, key = { it.id }) { figure ->
+                            WishlistItemCard(
+                                figure = figure,
+                                onOpenEbay = { figure.ebayUrl?.let { url -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } },
+                                onRemove = { wishlistViewModel.removeFromWishlist(figure.id) }
+                            )
                         }
                     }
                 }
@@ -124,63 +114,69 @@ fun WishlistScreen(
 }
 
 @Composable
-private fun WishlistSummaryBanner(count: Int, totalValue: Double) {
+private fun WishlistHudBanner(count: Int, totalValue: Double) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(MaterialTheme.shapes.large)
-            .background(Brush.linearGradient(listOf(Color(0xFF1A1040), Color(0xFF0A2030))))
-            .padding(16.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .background(Brush.linearGradient(listOf(Color(0xFF1A0030), Color(0xFF0D0026))))
+            .border(1.dp, NeonPurple.copy(0.4f), MaterialTheme.shapes.medium)
     ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.fillMaxWidth().height(2.dp).background(Brush.horizontalGradient(listOf(NeonPurple, NeonCyan))).align(Alignment.TopStart))
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Column {
-                Text("$count figure desiderate", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("€ %.2f".format(totalValue), style = MaterialTheme.typography.headlineSmall, color = Gold, fontWeight = FontWeight.Bold)
+                Text("// BUDGET TARGET", fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = TextSecondary, letterSpacing = 1.sp)
+                Spacer(Modifier.height(4.dp))
+                Text("€ ${"%,.2f".format(totalValue)}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 22.sp, color = NeonGold, letterSpacing = 1.sp)
             }
-            Icon(Icons.Default.BookmarkBorder, contentDescription = null, tint = Teal, modifier = Modifier.size(36.dp))
+            Column(horizontalAlignment = Alignment.End) {
+                Text("ITEMS", fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = TextSecondary, letterSpacing = 1.sp)
+                Text("$count", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 22.sp, color = NeonPurple)
+            }
         }
     }
 }
 
 @Composable
 private fun WishlistItemCard(figure: ActionFigure, onOpenEbay: () -> Unit, onRemove: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = MaterialTheme.shapes.large
+    Box(
+        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium)
+            .background(DarkPanel2).border(1.dp, GridLine, MaterialTheme.shapes.medium)
     ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(72.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surface),
+                modifier = Modifier.size(68.dp).clip(MaterialTheme.shapes.small)
+                    .background(SpaceBlack).border(1.dp, GridLine, MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center
             ) {
                 if (figure.imageUrl != null) {
                     AsyncImage(model = figure.imageUrl, contentDescription = figure.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 } else {
-                    Icon(Icons.Default.SmartToy, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Default.SmartToy, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(32.dp))
                 }
             }
-
             Spacer(Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(figure.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, maxLines = 2)
                 figure.condition?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(it.uppercase(), fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = NeonPurple.copy(0.6f), letterSpacing = 1.sp)
                 }
                 figure.price?.let {
-                    Text("€ %.2f".format(it), style = MaterialTheme.typography.labelLarge, color = Gold, fontWeight = FontWeight.Bold)
+                    Text("€ ${"%.2f".format(it)}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = NeonGold)
                 }
             }
-
             figure.ebayUrl?.let {
                 IconButton(onClick = onOpenEbay) {
-                    Icon(Icons.Default.OpenInBrowser, contentDescription = "Apri su eBay", tint = Purple, modifier = Modifier.size(24.dp))
+                    Icon(Icons.Default.OpenInBrowser, contentDescription = "Apri su eBay", tint = NeonCyan, modifier = Modifier.size(22.dp))
                 }
             }
             IconButton(onClick = onRemove) {
-                Icon(Icons.Default.Delete, contentDescription = "Rimuovi", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(24.dp))
+                Icon(Icons.Default.Delete, contentDescription = "Rimuovi", tint = NeonPink, modifier = Modifier.size(22.dp))
             }
         }
     }

@@ -1,9 +1,11 @@
 package com.example.actionfiguresapp.android.ui.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,12 +35,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.actionfiguresapp.android.Purple
-import com.example.actionfiguresapp.android.Teal
+import androidx.compose.ui.unit.sp
+import com.example.actionfiguresapp.android.DarkPanel2
+import com.example.actionfiguresapp.android.GridLine
+import com.example.actionfiguresapp.android.NeonCyan
+import com.example.actionfiguresapp.android.NeonGold
+import com.example.actionfiguresapp.android.NeonGreen
+import com.example.actionfiguresapp.android.NeonPurple
+import com.example.actionfiguresapp.android.SpaceBlack
+import com.example.actionfiguresapp.android.TextSecondary
 import com.example.actionfiguresapp.presentation.viewmodel.AuthViewModel
 
 @Composable
@@ -60,55 +71,57 @@ fun RegisterScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = SpaceBlack
     ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color(0xFF0D2040), MaterialTheme.colorScheme.background),
-                        endY = 900f
-                    )
-                )
+                .background(Brush.radialGradient(colors = listOf(Color(0xFF0D0A1E), SpaceBlack), radius = 1200f))
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 28.dp),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 28.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Crea il tuo", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(
-                    text = "Profilo Collezionista",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        brush = Brush.linearGradient(listOf(Purple, Teal))
-                    )
-                )
+                Text("NEW_PLAYER.INIT()", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 18.sp, letterSpacing = 2.sp, color = NeonGreen)
+                Spacer(Modifier.height(4.dp))
+                Text("CREA IL TUO PROFILO COLLEZIONISTA", fontFamily = FontFamily.Monospace, fontSize = 9.sp, letterSpacing = 1.5.sp, color = TextSecondary)
 
-                Spacer(Modifier.height(36.dp))
+                Spacer(Modifier.height(32.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Box(Modifier.weight(1f).height(1.dp).background(GridLine))
+                    Text("  REGISTRAZIONE  ", fontFamily = FontFamily.Monospace, fontSize = 10.sp, color = TextSecondary, letterSpacing = 2.sp)
+                    Box(Modifier.weight(1f).height(1.dp).background(GridLine))
+                }
+
+                Spacer(Modifier.height(24.dp))
 
                 listOf(
-                    Triple(displayName, { v: String -> displayName = v }, "Nome"),
-                    Triple(email, { v: String -> email = v }, "Email"),
-                ).forEach { (value, onValue, label) ->
+                    Triple(displayName, { v: String -> displayName = v }, "USERNAME"),
+                    Triple(email, { v: String -> email = v }, "EMAIL"),
+                ).forEachIndexed { index, (value, onValue, label) ->
+                    val accentColor = if (index == 0) NeonGreen else NeonCyan
                     OutlinedTextField(
                         value = value,
                         onValueChange = onValue,
-                        label = { Text(label) },
+                        label = { Text(label, fontFamily = FontFamily.Monospace, fontSize = 11.sp) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = if (label == "Email") KeyboardType.Email else KeyboardType.Text,
+                            keyboardType = if (label == "EMAIL") KeyboardType.Email else KeyboardType.Text,
                             imeAction = ImeAction.Next
                         ),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Teal,
-                            focusedLabelColor = Teal,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                            focusedBorderColor = accentColor,
+                            unfocusedBorderColor = GridLine,
+                            focusedLabelColor = accentColor,
+                            unfocusedLabelColor = TextSecondary,
+                            focusedTextColor = accentColor,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            cursorColor = accentColor
                         ),
-                        shape = MaterialTheme.shapes.medium,
+                        shape = MaterialTheme.shapes.small,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(Modifier.height(12.dp))
@@ -117,19 +130,20 @@ fun RegisterScreen(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text("PASSWORD", fontFamily = FontFamily.Monospace, fontSize = 11.sp) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Teal,
-                        focusedLabelColor = Teal,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        focusedBorderColor = NeonPurple,
+                        unfocusedBorderColor = GridLine,
+                        focusedLabelColor = NeonPurple,
+                        unfocusedLabelColor = TextSecondary,
+                        focusedTextColor = NeonPurple,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        cursorColor = NeonPurple
                     ),
-                    shape = MaterialTheme.shapes.medium,
+                    shape = MaterialTheme.shapes.small,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -138,24 +152,22 @@ fun RegisterScreen(
                 Button(
                     onClick = { viewModel.signUp(email, password, displayName) },
                     enabled = !uiState.isLoading && displayName.isNotBlank() && email.isNotBlank() && password.isNotBlank(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = MaterialTheme.shapes.medium,
-                    colors = ButtonDefaults.buttonColors(containerColor = Teal)
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = MaterialTheme.shapes.small,
+                    colors = ButtonDefaults.buttonColors(containerColor = NeonGreen, contentColor = SpaceBlack, disabledContainerColor = GridLine)
                 ) {
                     if (uiState.isLoading) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp))
+                        CircularProgressIndicator(color = SpaceBlack, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("Registrati", style = MaterialTheme.typography.labelLarge)
+                        Text("[ CREA ACCOUNT ]", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
                     }
                 }
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
 
                 TextButton(onClick = onNavigateToLogin) {
-                    Text("Hai già un account? ", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("Accedi", color = Purple)
+                    Text("GIÀ REGISTRATO? ", fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = TextSecondary)
+                    Text("LOGIN", fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = NeonGold)
                 }
             }
         }

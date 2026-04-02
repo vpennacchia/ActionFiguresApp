@@ -1,6 +1,9 @@
 package com.example.actionfiguresapp.android.navigation
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -12,7 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.example.actionfiguresapp.android.DarkPanel
+import com.example.actionfiguresapp.android.GridLine
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -20,7 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.actionfiguresapp.android.Purple
+import com.example.actionfiguresapp.android.NeonCyan
 import com.example.actionfiguresapp.android.ui.auth.LoginScreen
 import com.example.actionfiguresapp.android.ui.auth.RegisterScreen
 import com.example.actionfiguresapp.android.ui.collections.CollectionDetailScreen
@@ -142,7 +149,15 @@ private fun MainWithBottomNav(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+            val barShape = RoundedCornerShape(24.dp)
+            NavigationBar(
+                containerColor = DarkPanel,
+                modifier = Modifier
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .fillMaxWidth()
+                    .clip(barShape)
+                    .border(1.dp, GridLine, barShape)
+            ) {
                 BottomNavItem.items.forEach { item ->
                     NavigationBarItem(
                         selected = currentRoute == item.route,
@@ -156,9 +171,9 @@ private fun MainWithBottomNav(
                         icon = { Icon(item.icon, contentDescription = item.label) },
                         label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Purple,
-                            selectedTextColor = Purple,
-                            indicatorColor = Purple.copy(alpha = 0.12f),
+                            selectedIconColor = NeonCyan,
+                            selectedTextColor = NeonCyan,
+                            indicatorColor = NeonCyan.copy(alpha = 0.12f),
                             unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )

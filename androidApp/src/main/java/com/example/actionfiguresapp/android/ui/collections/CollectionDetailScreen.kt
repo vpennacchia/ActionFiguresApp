@@ -1,6 +1,7 @@
 package com.example.actionfiguresapp.android.ui.collections
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +21,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -42,12 +41,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.example.actionfiguresapp.android.Gold
-import com.example.actionfiguresapp.android.Purple
-import com.example.actionfiguresapp.android.Teal
+import com.example.actionfiguresapp.android.DarkPanel2
+import com.example.actionfiguresapp.android.GridLine
+import com.example.actionfiguresapp.android.NeonCyan
+import com.example.actionfiguresapp.android.NeonGold
+import com.example.actionfiguresapp.android.NeonGreen
+import com.example.actionfiguresapp.android.NeonPink
+import com.example.actionfiguresapp.android.NeonPurple
+import com.example.actionfiguresapp.android.SpaceBlack
+import com.example.actionfiguresapp.android.TextSecondary
 import com.example.actionfiguresapp.domain.model.ActionFigure
 import com.example.actionfiguresapp.domain.model.Collection
 import com.example.actionfiguresapp.presentation.viewmodel.CollectionsViewModel
@@ -63,39 +70,35 @@ fun CollectionDetailScreen(
     val uiState by collectionsViewModel.uiState.collectAsState()
     val collection = uiState.collections.find { it.id == collectionId }
 
-    LaunchedEffect(collectionId) {
-        collection?.let { collectionsViewModel.selectCollection(it) }
-    }
+    LaunchedEffect(collectionId) { collection?.let { collectionsViewModel.selectCollection(it) } }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = SpaceBlack,
         topBar = {
             TopAppBar(
-                title = { Text(collection?.name ?: "", style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Indietro")
+                title = {
+                    Column {
+                        Text(collection?.name?.uppercase() ?: "", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = NeonCyan, letterSpacing = 1.sp)
+                        Text("COLLECTION.VIEW", fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = TextSecondary, letterSpacing = 1.sp)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = NeonCyan)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SpaceBlack)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddFigure,
-                containerColor = Teal,
-                contentColor = Color.White,
-                shape = MaterialTheme.shapes.medium
-            ) {
+            FloatingActionButton(onClick = onAddFigure, containerColor = NeonGreen, contentColor = SpaceBlack, shape = MaterialTheme.shapes.small) {
                 Icon(Icons.Default.Add, contentDescription = "Aggiungi figura")
             }
         }
     ) { padding ->
         if (collection == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Purple)
+                CircularProgressIndicator(color = NeonCyan)
             }
             return@Scaffold
         }
@@ -103,39 +106,23 @@ fun CollectionDetailScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item { ValueHeroCard(collection = collection) }
-
+            item { HudValueCard(collection = collection) }
+            item { Spacer(Modifier.height(4.dp)) }
             if (collection.figures.isEmpty()) {
                 item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.SmartToy,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(48.dp)
-                            )
-                            Spacer(Modifier.height(12.dp))
-                            Text("Nessuna figura", style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                "Premi + per aggiungerne una",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Text("[ DATABASE VUOTO ]", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = NeonPurple, letterSpacing = 2.sp)
+                            Spacer(Modifier.height(8.dp))
+                            Text("Premi + per aggiungere una figura", fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = TextSecondary)
                         }
                     }
                 }
             } else {
                 items(collection.figures, key = { it.id }) { figure ->
-                    FigureCard(
-                        figure = figure,
-                        onDelete = { collectionsViewModel.removeFigure(collectionId, figure.id) }
-                    )
+                    FigureCard(figure = figure, onDelete = { collectionsViewModel.removeFigure(collectionId, figure.id) })
                 }
             }
         }
@@ -143,35 +130,31 @@ fun CollectionDetailScreen(
 }
 
 @Composable
-private fun ValueHeroCard(collection: Collection) {
+private fun HudValueCard(collection: Collection) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.large)
-            .background(Brush.linearGradient(listOf(Color(0xFF1A1040), Color(0xFF0D2040))))
-            .padding(24.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .background(Brush.linearGradient(listOf(Color(0xFF001A2E), Color(0xFF0A001A))))
+            .border(1.dp, NeonCyan.copy(0.3f), MaterialTheme.shapes.medium)
     ) {
-        Column {
-            Text(
-                "Valore totale",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "€ %.2f".format(collection.totalValue),
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = Gold
-            )
+        Box(modifier = Modifier.fillMaxWidth().height(2.dp).background(Brush.horizontalGradient(listOf(NeonCyan, NeonPurple))).align(Alignment.TopStart))
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("// ANALISI VALORE COLLEZIONE", fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = TextSecondary, letterSpacing = 1.sp)
             Spacer(Modifier.height(8.dp))
+            Text(
+                text = "€ ${"%,.2f".format(collection.totalValue)}",
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp,
+                color = NeonGold,
+                letterSpacing = 1.sp
+            )
+            Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                StatChip(label = "${collection.figureCount}", sublabel = "figure")
+                HudStat(label = "FIGURE", value = "${collection.figureCount}", color = NeonCyan)
                 if (collection.figureCount > 0) {
-                    StatChip(
-                        label = "€ %.2f".format(collection.totalValue / collection.figureCount),
-                        sublabel = "media"
-                    )
+                    HudStat(label = "MEDIA", value = "€${"%.2f".format(collection.totalValue / collection.figureCount)}", color = NeonPurple)
                 }
             }
         }
@@ -179,76 +162,55 @@ private fun ValueHeroCard(collection: Collection) {
 }
 
 @Composable
-private fun StatChip(label: String, sublabel: String) {
+private fun HudStat(label: String, value: String, color: Color) {
     Box(
         modifier = Modifier
-            .background(Color.White.copy(alpha = 0.08f), MaterialTheme.shapes.small)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .background(color.copy(0.08f), MaterialTheme.shapes.small)
+            .border(1.dp, color.copy(0.3f), MaterialTheme.shapes.small)
+            .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(label, style = MaterialTheme.typography.labelLarge, color = Color.White, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.width(4.dp))
-            Text(sublabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(value, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = color)
+            Text(label, fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = TextSecondary, letterSpacing = 1.sp)
         }
     }
 }
 
 @Composable
 private fun FigureCard(figure: ActionFigure, onDelete: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = MaterialTheme.shapes.large
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .background(DarkPanel2)
+            .border(1.dp, GridLine, MaterialTheme.shapes.medium)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colorScheme.surface),
+                modifier = Modifier.size(68.dp).clip(MaterialTheme.shapes.small)
+                    .background(SpaceBlack).border(1.dp, GridLine, MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center
             ) {
                 if (figure.imageUrl != null) {
-                    AsyncImage(
-                        model = figure.imageUrl,
-                        contentDescription = figure.name,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    AsyncImage(model = figure.imageUrl, contentDescription = figure.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 } else {
-                    Icon(Icons.Default.SmartToy, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Default.SmartToy, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(32.dp))
                 }
             }
-
             Spacer(Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = figure.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2
-                )
+                Text(figure.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, maxLines = 2, color = MaterialTheme.colorScheme.onSurface)
                 figure.condition?.let {
                     Spacer(Modifier.height(2.dp))
-                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(it.uppercase(), fontFamily = FontFamily.Monospace, fontSize = 9.sp, color = NeonCyan.copy(0.6f), letterSpacing = 1.sp)
                 }
                 figure.price?.let {
                     Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "€ %.2f".format(it),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Gold,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("€ ${"%.2f".format(it)}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = NeonGold)
                 }
             }
-
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Rimuovi", tint = MaterialTheme.colorScheme.error)
+                Icon(Icons.Default.Delete, contentDescription = "Rimuovi", tint = NeonPink, modifier = Modifier.size(20.dp))
             }
         }
     }
