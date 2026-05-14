@@ -13,4 +13,12 @@ interface CollectionRepository {
 
     suspend fun addFigure(userId: String, collectionId: String, figure: ActionFigure): Result<Unit>
     suspend fun removeFigure(userId: String, collectionId: String, figureId: String): Result<Unit>
+    suspend fun updateFigurePrice(
+        userId: String,
+        collectionId: String,
+        figureId: String,
+        newAveragePrice: Double,
+        previousAveragePrice: Double,
+        checkedAt: Long
+    ): Result<Unit>
 }

@@ -29,6 +29,9 @@ class CollectionRepositoryImpl(
                         name = figDoc.get("name"),
                         imageUrl = figDoc.get("imageUrl"),
                         price = figDoc.get("price"),
+                        averageMarketPrice = figDoc.get("averageMarketPrice"),
+                        previousAveragePrice = figDoc.get("previousAveragePrice"),
+                        lastPriceCheck = figDoc.get("lastPriceCheck"),
                         currency = figDoc.get<String?>("currency") ?: "EUR",
                         condition = figDoc.get("condition"),
                         ebayItemId = figDoc.get("ebayItemId"),
@@ -59,6 +62,12 @@ class CollectionRepositoryImpl(
                     "createdAt" to now
                 )
             )
+            runCatching {
+                val userDoc = firestore.collection("users").document(collection.userId).get()
+                val current = userDoc.get<Int?>("collectionsCount") ?: 0
+                firestore.collection("users").document(collection.userId)
+                    .update(mapOf("collectionsCount" to current + 1))
+            }
             collection.copy(id = id, createdAt = now)
         }
     }
@@ -78,6 +87,12 @@ class CollectionRepositoryImpl(
         return runCatching {
             figuresRef(userId, collectionId).get().documents.forEach { it.reference.delete() }
             collectionsRef(userId).document(collectionId).delete()
+            runCatching {
+                val userDoc = firestore.collection("users").document(userId).get()
+                val current = userDoc.get<Int?>("collectionsCount") ?: 0
+                firestore.collection("users").document(userId)
+                    .update(mapOf("collectionsCount" to maxOf(0, current - 1)))
+            }
         }
     }
 
@@ -85,11 +100,15 @@ class CollectionRepositoryImpl(
     override suspend fun addFigure(userId: String, collectionId: String, figure: ActionFigure): Result<Unit> {
         return runCatching {
             val figureId = Uuid.random().toString()
+            val now = Clock.System.now().epochSeconds
             figuresRef(userId, collectionId).document(figureId).set(
                 mapOf(
                     "name" to figure.name,
                     "imageUrl" to figure.imageUrl,
                     "price" to figure.price,
+                    "averageMarketPrice" to figure.averageMarketPrice,
+                    "previousAveragePrice" to figure.previousAveragePrice,
+                    "lastPriceCheck" to now,
                     "currency" to figure.currency,
                     "condition" to figure.condition,
                     "ebayItemId" to figure.ebayItemId,
@@ -102,6 +121,25 @@ class CollectionRepositoryImpl(
     override suspend fun removeFigure(userId: String, collectionId: String, figureId: String): Result<Unit> {
         return runCatching {
             figuresRef(userId, collectionId).document(figureId).delete()
+        }
+    }
+
+    override suspend fun updateFigurePrice(
+        userId: String,
+        collectionId: String,
+        figureId: String,
+        newAveragePrice: Double,
+        previousAveragePrice: Double,
+        checkedAt: Long
+    ): Result<Unit> {
+        return runCatching {
+            figuresRef(userId, collectionId).document(figureId).update(
+                mapOf(
+                    "averageMarketPrice" to newAveragePrice,
+                    "previousAveragePrice" to previousAveragePrice,
+                    "lastPriceCheck" to checkedAt
+                )
+            )
         }
     }
 }

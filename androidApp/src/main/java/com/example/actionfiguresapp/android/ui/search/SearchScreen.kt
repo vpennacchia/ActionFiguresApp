@@ -125,6 +125,36 @@ fun SearchScreen(
                         Text("[ NESSUN RISULTATO ]", fontFamily = FontFamily.Monospace, fontSize = 12.sp, color = NeonCyan, letterSpacing = 2.sp)
                     }
                     else -> LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        // Banner prezzo medio di mercato per la ricerca corrente
+                        val marketAvg = searchState.results.firstOrNull()?.averageMarketPrice
+                        if (marketAvg != null) {
+                            item {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                        .clip(MaterialTheme.shapes.small)
+                                        .background(NeonGold.copy(0.05f))
+                                        .border(1.dp, NeonGold.copy(0.25f), MaterialTheme.shapes.small)
+                                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        "PREZZO MEDIO DI MERCATO",
+                                        fontFamily = FontFamily.Monospace,
+                                        fontSize = 9.sp,
+                                        color = TextSecondary,
+                                        letterSpacing = 1.sp
+                                    )
+                                    Text(
+                                        "€ ${"%.2f".format(marketAvg)}",
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp,
+                                        color = NeonGold
+                                    )
+                                }
+                            }
+                        }
                         items(searchState.results) { figure ->
                             SearchResultCard(figure = figure, onAdd = {
                                 collectionsViewModel.addFigure(collectionId, figure)

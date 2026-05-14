@@ -34,10 +34,20 @@ import com.example.actionfiguresapp.android.ui.collections.CollectionDetailScree
 import com.example.actionfiguresapp.android.ui.collections.CollectionsScreen
 import com.example.actionfiguresapp.android.ui.explore.ExploreScreen
 import com.example.actionfiguresapp.android.ui.search.SearchScreen
+import com.example.actionfiguresapp.android.ui.social.CreatePostScreen
+import com.example.actionfiguresapp.android.ui.social.PublicCollectionDetailScreen
+import com.example.actionfiguresapp.android.ui.social.PublicProfileScreen
+import com.example.actionfiguresapp.android.ui.social.SocialFeedScreen
+import com.example.actionfiguresapp.android.ui.social.UserSearchScreen
 import com.example.actionfiguresapp.android.ui.wishlist.WishlistScreen
 import com.example.actionfiguresapp.presentation.viewmodel.AuthViewModel
 import com.example.actionfiguresapp.presentation.viewmodel.CollectionsViewModel
+import com.example.actionfiguresapp.presentation.viewmodel.CreatePostViewModel
+import com.example.actionfiguresapp.presentation.viewmodel.PublicCollectionDetailViewModel
+import com.example.actionfiguresapp.presentation.viewmodel.PublicProfileViewModel
 import com.example.actionfiguresapp.presentation.viewmodel.SearchViewModel
+import com.example.actionfiguresapp.presentation.viewmodel.SocialFeedViewModel
+import com.example.actionfiguresapp.presentation.viewmodel.UserSearchViewModel
 import com.example.actionfiguresapp.presentation.viewmodel.WishlistViewModel
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
@@ -58,6 +68,10 @@ fun NavGraph(navController: NavHostController) {
     val wishlistViewModel: WishlistViewModel = koinInject()
     val exploreSearchViewModel: SearchViewModel = koinInject(qualifier = named("explore"))
     val collectionSearchViewModel: SearchViewModel = koinInject(qualifier = named("collection"))
+    val socialFeedViewModel: SocialFeedViewModel = koinInject()
+    val createPostViewModel: CreatePostViewModel = koinInject()
+    val userSearchViewModel: UserSearchViewModel = koinInject()
+    val publicProfileViewModel: PublicProfileViewModel = koinInject()
 
     val authState by authViewModel.uiState.collectAsState()
 
@@ -94,6 +108,10 @@ fun NavGraph(navController: NavHostController) {
                 collectionsViewModel = collectionsViewModel,
                 wishlistViewModel = wishlistViewModel,
                 exploreSearchViewModel = exploreSearchViewModel,
+                socialFeedViewModel = socialFeedViewModel,
+                createPostViewModel = createPostViewModel,
+                userSearchViewModel = userSearchViewModel,
+                publicProfileViewModel = publicProfileViewModel,
                 onCollectionClick = { collectionId ->
                     navController.navigate("collection_detail/$collectionId")
                 },
@@ -133,12 +151,22 @@ fun NavGraph(navController: NavHostController) {
     }
 }
 
+private const val ROUTE_SOCIAL_FEED = "social_feed"
+private const val ROUTE_CREATE_POST = "create_post"
+private const val ROUTE_USER_SEARCH = "user_search"
+private const val ROUTE_PUBLIC_PROFILE = "public_profile/{userId}"
+private const val ROUTE_PUBLIC_COLLECTION_DETAIL = "public_collection_detail/{userId}/{collectionId}?collectionName={collectionName}"
+
 @Composable
 private fun MainWithBottomNav(
     authViewModel: AuthViewModel,
     collectionsViewModel: CollectionsViewModel,
     wishlistViewModel: WishlistViewModel,
     exploreSearchViewModel: SearchViewModel,
+    socialFeedViewModel: SocialFeedViewModel,
+    createPostViewModel: CreatePostViewModel,
+    userSearchViewModel: UserSearchViewModel,
+    publicProfileViewModel: PublicProfileViewModel,
     onCollectionClick: (String) -> Unit,
     onSignOut: () -> Unit
 ) {
@@ -201,12 +229,94 @@ private fun MainWithBottomNav(
                     wishlistViewModel = wishlistViewModel
                 )
             }
+            composable(BottomNavItem.Social.route) {
+                SocialNavHost(
+                    authViewModel = authViewModel,
+                    socialFeedViewModel = socialFeedViewModel,
+                    createPostViewModel = createPostViewModel,
+                    userSearchViewModel = userSearchViewModel,
+                    publicProfileViewModel = publicProfileViewModel
+                )
+            }
             composable(BottomNavItem.Wishlist.route) {
                 WishlistScreen(
                     authViewModel = authViewModel,
                     wishlistViewModel = wishlistViewModel
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun SocialNavHost(
+    authViewModel: AuthViewModel,
+    socialFeedViewModel: SocialFeedViewModel,
+    createPostViewModel: CreatePostViewModel,
+    userSearchViewModel: UserSearchViewModel,
+    publicProfileViewModel: PublicProfileViewModel
+) {
+    val socialNavController = rememberNavController()
+    val publicCollectionDetailViewModel: PublicCollectionDetailViewModel = koinInject()
+
+    NavHost(navController = socialNavController, startDestination = ROUTE_SOCIAL_FEED) {
+        composable(ROUTE_SOCIAL_FEED) {
+            SocialFeedScreen(
+                authViewModel = authViewModel,
+                socialFeedViewModel = socialFeedViewModel,
+                onCreatePost = { socialNavController.navigate(ROUTE_CREATE_POST) },
+                onSearchUsers = { socialNavController.navigate(ROUTE_USER_SEARCH) }
+            )
+        }
+        composable(ROUTE_CREATE_POST) {
+            CreatePostScreen(
+                authViewModel = authViewModel,
+                createPostViewModel = createPostViewModel,
+                onBack = { socialNavController.popBackStack() }
+            )
+        }
+        composable(ROUTE_USER_SEARCH) {
+            UserSearchScreen(
+                userSearchViewModel = userSearchViewModel,
+                onUserClick = { userId ->
+                    socialNavController.navigate("public_profile/$userId")
+                },
+                onBack = { socialNavController.popBackStack() }
+            )
+        }
+        composable(
+            route = ROUTE_PUBLIC_PROFILE,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            PublicProfileScreen(
+                userId = userId,
+                publicProfileViewModel = publicProfileViewModel,
+                onCollectionClick = { collectionId, collectionName ->
+                    val encodedName = android.net.Uri.encode(collectionName)
+                    socialNavController.navigate("public_collection_detail/$userId/$collectionId?collectionName=$encodedName")
+                },
+                onBack = { socialNavController.popBackStack() }
+            )
+        }
+        composable(
+            route = ROUTE_PUBLIC_COLLECTION_DETAIL,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType },
+                navArgument("collectionId") { type = NavType.StringType },
+                navArgument("collectionName") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            val collectionId = backStackEntry.arguments?.getString("collectionId") ?: return@composable
+            val collectionName = backStackEntry.arguments?.getString("collectionName") ?: ""
+            PublicCollectionDetailScreen(
+                userId = userId,
+                collectionId = collectionId,
+                collectionName = collectionName,
+                viewModel = publicCollectionDetailViewModel,
+                onBack = { socialNavController.popBackStack() }
+            )
         }
     }
 }

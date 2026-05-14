@@ -9,7 +9,7 @@ data class Collection(
     val createdAt: Long = 0L
 ) {
     val totalValue: Double
-        get() = figures.sumOf { it.price ?: 0.0 }
+        get() = figures.sumOf { it.averageMarketPrice ?: it.price ?: 0.0 }
 
     val figureCount: Int
         get() = figures.size

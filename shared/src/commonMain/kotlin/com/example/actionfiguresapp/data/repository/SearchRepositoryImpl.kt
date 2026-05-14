@@ -13,12 +13,16 @@ class SearchRepositoryImpl(
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun searchFigures(query: String): Result<List<ActionFigure>> {
         return runCatching {
-            ebayApiService.searchItems(query).map { item ->
+            val items = ebayApiService.searchItems(query)
+            val prices = items.mapNotNull { it.price?.value?.toDoubleOrNull() }
+            val averageMarketPrice = if (prices.isNotEmpty()) prices.average() else null
+            items.map { item ->
                 ActionFigure(
                     id = Uuid.random().toString(),
                     name = item.title,
                     imageUrl = item.image?.imageUrl,
                     price = item.price?.value?.toDoubleOrNull(),
+                    averageMarketPrice = averageMarketPrice,
                     currency = item.price?.currency ?: "EUR",
                     condition = item.condition,
                     ebayItemId = item.itemId,

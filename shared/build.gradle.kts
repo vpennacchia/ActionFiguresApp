@@ -51,6 +51,7 @@ kotlin {
             // Firebase
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
+            implementation(libs.firebase.storage)
 
             // ViewModel
             implementation(libs.lifecycle.viewmodel)
